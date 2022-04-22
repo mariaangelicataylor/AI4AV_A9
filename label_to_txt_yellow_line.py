@@ -75,7 +75,7 @@ def label2txt(frames, output_dir: Path):
                             if box2d["x1"] >= box2d["x2"] or box2d["y1"] >= box2d["y2"]: #if box is invalid
                                 continue
                             cx, cy, width, height = box2d_to_yolo(box2d) # Get yolo The coordinates for a valid box
-                            if cx+width < 0.5:#If the vehicle is seen on the left, ignore them
+                            if cx+width < 0.3:#If the vehicle is seen on the left, ignore them
                                 continue
                             f.write("{} {} {} {} {}\n".format(lbl, cx, cy, width, height))
             else: #Check for the all the cars, trucks or buses 
