@@ -61,10 +61,17 @@ python label_to_txt_yellow_line.py -l ~/PATH_TO_DATA/bdd100k/val/bdd100k_labels_
 
 After we use the script rm_imgs_without_labels.py to check to remove the training image if not label information present. This situation is present when no labels for those frames were present in the json file. 
 
+```html
+python rm_imgs_without_labels.py -d ~/bdd100k/train/images -l ~/PATH_TO_DATA/bdd100k/train/labels
+python rm_imgs_without_labels.py -d ~/bdd100k/val/images -l ~/PATH_TO_DATA/bdd100k/val/labels
+```
+
 #### Separarte labels and images into different folders to train in colab - optional, depends on good drive storage availability. 
 
-Open the file script.ipynb determine the number of file you want in each folder, in this case N = 1000. For training it will create 69 folders with 1k images and the 79th one with 863 images. Do the same for training labels, val images and val labels. Feel free to conver this simple code into .py. I just like jupyter notebooks. 
-
+```html
+python split_training.py -l ~/bdd100k/train/images -n 20000
+python split_training.py -l ~/bdd100k/train/labels -n 20000
+```
 ## COLAB set up
 Create a folder in your drive named bdd100k, inside create folders train, test, val. Inside train and val create a folder named images and labels. 
 
