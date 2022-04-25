@@ -21,18 +21,18 @@ Location of project: https://drive.google.com/drive/folders/1jFc2SKXuAHEXBElpq68
 
 For this project the more important is to do the pre prosessing data. First I tried to filter all the labels to take into account only the right half of the image, however training the first batch the network was bias and will ignore the vehicles in the left if they are in the same direction as shown as follows:
 
-<img src="imgs/05.jpg" alt="gr">
+<img src="imgs/05.jpg" alt="gr1">
 
 Then, I filter labels such that if there is a yellow line consider the vehicles in the right side of the frame, this was working good when the cars where in the same direction, but not when there was a yellow line, because it was misisng cars in front. Per example if the vehicle is riding at the right of a two lane road, the camera may see it in the left side and ignore it. As shown bellow: 
 
-<img src="imgs/05yellow.jpg" alt="gr">
+<img src="imgs/05yellow.jpg" alt="gr2">
 
 Finally, I filter as if the image have the label yellow line, this means that cars are driving in both directions and we need do not want to label the ones driving in the opposite direction. In this care we only care about the labels that there bounding box is present in the 2/3 right portion of the frame. Note that the 2/3 estimation is an empirical estmation that worked favorable in this dataset. If there is not a yellow line in the frame, we assume that the frame have with lines that means there is cars drivng in the same direction only. In this case, we take into account all the labels for car, bus and truck present in the image. Due the COLAB ram limitations I only trained in 5k images and validated in the 10k provided. The dataset training is in the train2, val2 and test folder. The final resuls are in backup_all13. 
 
 Note solving this problems relies heavely on the processing of the labels, a better solution could be to filter the cars in the oposite direction as the ones to the left to the yellow line and ignore them. However it will still have errors since the man x of the bounding box of the opposite direction car could be after the yellow line vertix. I also notice that the yellow lines labels are poligons with vertices are need to be interpolated. After that, I will eval if there is a car that overlap that boundery if there is, then I will check if most of the area is at the left or at the right. If there is at the left it is driving at the same direction, if there is at the right it is driving in the opposite direction. This a much more complicated label filter for another time, specially interpolating the vertices. Another consideration is that the pre trained models already detect cars, front and back so we need to teach the model to stop classified it as a car. Also, sometimes there is not a yellow line instad a concrete divition in the highway therefore other label processing is needed to identify this situation. 
 
-<img src="imgs/confusion_matrix.jpg" alt="gr">
-<img src="imgs/results.jpg" alt="gr">
+<img src="imgs/confusion_matrix.jpg" alt="gr3">
+<img src="imgs/results.jpg" alt="gr3">
 
 
 # Instructions: 
@@ -124,14 +124,6 @@ You can also use detect on your test set using this code:
 !python detect.py --classes 3 --weights best.pt --data data/bdd100k.yaml --img 640 --conf 0.25 --source ../drive/MyDrive/bdd100k/test/images --save-txt
 
 Test and Enjoy!
-
-First I tried to filter all the labels to take into account only the right half of the image, however training the first batch the network was bias and will ignore the vehicles in the left if they are in the same direction as shown as follows:
-
-<img src="imgs/05.jpg" alt="gr">
-
-Then, I filter labels such that if there is a yellow line consider the vehicles in the right side of the frame, this was working good when the cars where in the same direction, but not when there was a yellow line, because it was misisng cars in front. Per example if the vehicle is riding at the right of a two lane road, the camera may see it in the left side and ignore it. As shown bellow: 
-
-<img src="imgs/05yellow.jpg" alt="gr">
 
 References: 
 
