@@ -65,6 +65,7 @@ def label2txt(frames, output_dir: Path):
                         attributes = label["attributes"]
                         if attributes["laneType"] == "double yellow" or attributes["laneType"] == "single yellow": #yellow lane present in the image
                             yellow_present = True
+                            print("yellow_present")
             if yellow_present: #Only check to the boxes in the left for car, truck or bus
                 for label in frame["labels"]:
                         if "box2d" not in label: #Check if there is box2d in the label
