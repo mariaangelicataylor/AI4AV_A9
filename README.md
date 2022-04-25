@@ -19,7 +19,22 @@ Plataform = COLAB
 
 Location of project: https://drive.google.com/drive/folders/1jFc2SKXuAHEXBElpq68asIs0gjtRl9xw?usp=sharing
 
-## Local folder structure : 
+For this project the more important is to do the pre prosessing data. First I tried to filter all the labels to take into account only the right half of the image, however training the first batch the network was bias and will ignore the vehicles in the left if they are in the same direction as shown as follows:
+
+<img src="imgs/05.jpg" alt="gr">
+
+Then, I filter labels such that if there is a yellow line consider the vehicles in the right side of the frame, this was working good when the cars where in the same direction, but not when there was a yellow line, because it was misisng cars in front. Per example if the vehicle is riding at the right of a two lane road, the camera may see it in the left side and ignore it. As shown bellow: 
+
+<img src="imgs/05yellow.jpg" alt="gr">
+
+Finally, I filter as if the image have the label yellow line, this means that cars are driving in both directions and we need do not want to label the ones driving in the opposite direction. In this care we only care about the labels that there bounding box is present in the 2/3 right portion of the frame. Note that the 2/3 estimation is an empirical estmation that worked favorable in this dataset. If there is not a yellow line in the frame, we assume that the frame have with lines that means there is cars drivng in the same direction only. In this case, we take into account all the labels for car, bus and truck present in the image. Due the COLAB ram limitations I only trained in 5k images and validated in the 10k provided. The dataset training is in the train2, val2 and test folder. The final resuls are in backup_all13. 
+
+Note solving this problems relies heavely on the processing of the labels, a better solution could be to filter the cars in the oposite direction as the ones to the left to the yellow line and ignore them. However it will still have errors since the man x of the bounding box of the opposite direction car could be after the yellow line vertix. I also notice that the yellow lines labels are poligons with vertices are need to be interpolated. After that, I will eval if there is a car that overlap that boundery if there is, then I will check if most of the area is at the left or at the right. If there is at the left it is driving at the same direction, if there is at the right it is driving in the opposite direction. This a much more complicated label filter for another time, specially interpolating the vertices. Another consideration is that the pre trained models already detect cars, front and back so we need to teach the model to stop classified it as a car.
+
+
+# Instructions: 
+
+## Local folder structure: 
 
 1. Download data set in your local machine
 2. Make a folder named bbdd100k, inside made four folders: test, train, val, utils. Inside train and val create two folders images and labels. 
@@ -45,7 +60,7 @@ Move the downloaded images on the train/images, val/images and test folder. In t
 
 This step is super important since the labels for the dataset does not descriminate if it is the rear or the front of the car, therefore we need to pre process the labels to achive the desired performance. 
 
-If the image have the label yellow line, this means that cars in both directions are driving in both directions and we need do not want to label the ones driving in the opposite direction. In this care we only care about the labels that there bounding box is present in the 2/3 right portion of the frame. Note that the 2/3 estimation is an empirical estmation that worked favorable in this dataset. 
+If the image have the label yellow line, this means that cars are driving in both directions and we need do not want to label the ones driving in the opposite direction. In this care we only care about the labels that there bounding box is present in the 2/3 right portion of the frame. Note that the 2/3 estimation is an empirical estmation that worked favorable in this dataset. 
 
 If there is not a yellow line in the frame, we assume that the frame have with lines that means there is cars drivng in the same direction only. In this case, we take into account all the labels for car, bus and truck present in the image. 
 
@@ -68,10 +83,15 @@ python rm_imgs_without_labels.py -d ~/bdd100k/val/images -l ~/PATH_TO_DATA/bdd10
 
 #### Separarte labels and images into different folders to train in colab - optional, depends on good drive storage availability. 
 
+I recommend to divide your test set, in my case I split it every 1k images/labels since traing to train in colab sometimes will give a google drive time out for the amount of files. 
+
 ```html
-python split_training.py -l ~/bdd100k/train/images -n 20000
-python split_training.py -l ~/bdd100k/train/labels -n 20000
+python split_training.py -l ~/bdd100k/train/images -n 1000
+python split_training.py -l ~/bdd100k/train/labels -n 1000
 ```
+
+I only trained 1k at the time since COLAB is have several limitations, first if you have a free account and start training frequently it will tell you that can not train since not gpu resources are available, then I buyed the 10USD month subscription, however when is scanning training and validation images and creating the cache files it takes more than 7h to do 20k images. Therefore to train the hole dataset, I do not recommend COLAB.  
+
 ## COLAB set up
 Create a folder in your drive named bdd100k, inside create folders train, test, val. Inside train and val create a folder named images and labels. 
 
@@ -89,7 +109,7 @@ COLAB folder should look like:
 <img src="imgs/colab.png" alt="gr">
 
 ```html
-!python train.py --img 640 --batch 16 --epochs 100 --data bdd100k.yaml --weights yolov5s.pt --name AI4AV_results --cache --project '../drive/MyDrive/bdd100k' --name 'backup'
+!python train.py --img 640 --batch 32 --epochs 1000 --data bdd100k.yaml --weights yolov5s.pt --name AI4AV_results --cache --project '../drive/MyDrive/bdd100k' --name 'backup_all'
 ```
 This will create a backup folder that will save the best and last weights, and some metrics files. 
 
@@ -101,8 +121,6 @@ You can also use detect on your test set using this code:
 !python detect.py --classes 3 --weights best.pt --data data/bdd100k.yaml --img 640 --conf 0.25 --source ../drive/MyDrive/bdd100k/test/images --save-txt
 
 Test and Enjoy!
-
-Other attemps: 
 
 First I tried to filter all the labels to take into account only the right half of the image, however training the first batch the network was bias and will ignore the vehicles in the left if they are in the same direction as shown as follows:
 
